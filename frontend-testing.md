@@ -2,7 +2,7 @@
 
 > **Status:** DRAFT | **Owner:** Clarissa Audrey | **Jira:** [CI-7194](https://hootsuite.atlassian.net/browse/CI-7194) | **Last updated:** 2026-06-18
 
-Companion to [`design-doc.md`](./design-doc.md) and [`phased-plan.md`](./phased-plan.md). The four-tier pyramid, decisions D1–D7, principles, and triggers in those docs all carry forward; this page lists the FE deltas.
+Companion to [`design-doc.md`](./design-doc.md) and [`phased-plan.md`](./phased-plan.md). The four-tier pyramid, decisions D1–D7, principles, and triggers in those docs all carry forward; this page lists the FE deltas. For an audit of which other namespaces in `fe-global` already implement integration / contract testing — and which patterns to borrow vs. avoid — see [`frontend-inventory.md`](./frontend-inventory.md).
 
 # Scope
 
@@ -42,15 +42,15 @@ The 24 in-scope packages, by shape:
   * Specmatic-validate `fe-chan-comp-reauth-modal`'s MSW handlers against `channel-auth-audit`'s OpenAPI and SNEI's OpenAPI.
   * Specmatic-validate `fe-chan-multiselect-auth-app`'s handlers against `dashboard-som`'s OpenAPI.
   * **This is the FE-side analogue of the consumer mock-fidelity sub-tier in [`design-doc.md`](./design-doc.md).**
-* **Standardize on jest + MSW.** Today some packages use MSW (multiselect, reauth-modal), others use plain `jest.mock`. Pick one — MSW is the better bet because it lets us share fixtures with the backend Tier 1 mock-fidelity tests.
-* **Storybook MSW addon as canonical pattern** for visually-verifiable component states.
+* **Standardize on jest + MSW.** Today some packages use MSW (multiselect, reauth-modal), others use plain `jest.mock`. Pick one — MSW is the better bet because it lets us share fixtures with the backend Tier 1 mock-fidelity tests, and it is the dominant integration pattern across `fe-global` (see [`frontend-inventory.md`](./frontend-inventory.md)).
+* **Storybook MSW addon as canonical pattern** for visually-verifiable component states. The platform layer is already wired (`platform/fe-storybook/src/preview.tsx:27-59`); per-package work is just `parameters.msw.handlers`.
 
 ## Tier 2 — in-package integration
 
 For FE, "in-repo integration" means **component tests against MSW that share fixtures with backend Tier 1**. Two work items:
 
-1. **Standardize on Storybook + MSW addon** for all team-owned `fe-chan-*` packages so Tier 2 can be a single command per package.
-2. **Shared fixture format** between FE MSW handlers and backend Tier 1 mock-fidelity tests, so a backend OpenAPI change invalidates both in the same PR.
+1. **Standardize on Storybook + MSW addon** for all team-owned `fe-chan-*` packages so Tier 2 can be a single command per package. Pattern to copy: `adpromotion`'s shared `__mocks__/apiHandlers.ts` reused across Jest and Storybook (see [`frontend-inventory.md`](./frontend-inventory.md#adpromotion-53-packages--most-mature-msw-usage)).
+2. **Shared fixture format** between FE MSW handlers and backend Tier 1 mock-fidelity tests, so a backend OpenAPI change invalidates both in the same PR. **No `fe-global` namespace has solved this yet** — this is net-new FE work, not a port (see [`frontend-inventory.md`](./frontend-inventory.md#what-does-not-exist-as-cross-namespace-shared-infra)).
 
 Heavier lift than backend because of the per-package fan-out (24 team-owned packages) and the legacy/RTK dual codepaths in `fe-chan-multiselect-auth-app`.
 
@@ -67,7 +67,7 @@ If revisited:
 
 No FE Tier 4 today. Two options:
 
-* **Visual regression** via `platform/fe-lib-visual-testing` Playwright in CI for the 24 team-owned packages. Snapshot the Storybook for each `fe-chan-*` UI component on dev deploys.
+* **Visual regression** via `platform/fe-lib-visual-testing` Playwright in CI for the 24 team-owned packages. Snapshot the Storybook for each `fe-chan-*` UI component on dev deploys. **Caveat:** the `visual-test` Jenkins stage is currently commented out (`Jenkinsfile:366-383`) and only `unified-composer` tags stories `visual:check` — adopting this means platform work first, not just adding tags. See [`frontend-inventory.md`](./frontend-inventory.md#platformfe-lib-visual-testing-playwright-visual-regression--scaffolding-only).
 * **Synthetic UI flow** against staging dashboard exercising real reauth or multiselect modals. Heavier; defer until visual regression is in place.
 
 # Trigger matrix delta
@@ -86,13 +86,13 @@ If leadership wants the FE work to land:
 3. **Visual regression (Tier 4)** once Tier 1 fidelity is in place and a deploy cadence is wired.
 4. **FE Playwright in the harness (Phase 3.5)** only if the disconnect/reauth UI starts breaking in ways Tier 1+2 cannot catch.
 
-OQ-FE-1 (CODEOWNERS hygiene) can land in parallel at any time — it is not a blocker for the work above.
-
 # Open questions
 
 ## OQ-FE-1 — Shared fixture format with backend Tier 1
 
 If the team commits to MSW + jest as the FE Tier 1 standard, the FE MSW handlers and the backend mock-fidelity tests should share a single fixture format so that a backend OpenAPI change invalidates both in the same PR. Concrete decision needed: where do shared fixtures live, and what generates them? Options: hand-written JSON in IDL-central next to each spec; generated from the OpenAPI examples; generated from VCR-style recordings against staging.
+
+The audit in [`frontend-inventory.md`](./frontend-inventory.md#what-does-not-exist-as-cross-namespace-shared-infra) confirmed that no other namespace solves this — there is no shared FE fixtures package, no Specmatic helper, no Pact/hootpact harness. Whatever we ship here is precedent for FE at Hootsuite. The shape can still copy `adpromotion/fe-adp-comp-fb-audience-field/src/__mocks__/apiHandlers.ts` (named exports, query/body branching) — it is just the OpenAPI-validation layer that is novel.
 
 ## OQ-FE-2 — FE Playwright vs visual regression
 
