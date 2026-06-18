@@ -8,7 +8,7 @@ Companion to [`design-doc.md`](./design-doc.md) and [`phased-plan.md`](./phased-
 
 | Surface | What it is | Ownership | Source |
 | --- | --- | --- | --- |
-| `fe-global/channel-integrations/` (**24 team-owned `fe-chan-*` packages**; 27 in the namespace total, 3 carved out to `@hootsuite/frontend-platform`) | React + JS/TS mix + styled-components 5/6 + RTK + Bento `@ds/*`, jest with `*.jest.*` colocated tests, MSW for API tests in two top packages, Storybook in most UI packages | **Team-owned** (per CI-7194 ownership clarification, 2026-06-18). The CODEOWNERS line for the namespace is still commented out — see OQ-FE-1 (hygiene). | `.github/CODEOWNERS:28`: `#channel-integrations/ @hootsuite/ci-hippogriff` (disabled); per-package overrides at `.github/CODEOWNERS:67-69` for the 3 carve-outs. |
+| `fe-global/channel-integrations/` (**24 team-owned `fe-chan-*` packages**; 27 in the namespace total, 3 carved out to `@hootsuite/frontend-platform`) | React + JS/TS mix + styled-components 5/6 + RTK + Bento `@ds/*`, jest with `*.jest.*` colocated tests, MSW for API tests in two top packages, Storybook in most UI packages | **Team-owned** | `.github/CODEOWNERS:28`: `#channel-integrations/ @hootsuite/ci-hippogriff` (disabled); per-package overrides at `.github/CODEOWNERS:67-69` for the 3 carve-outs. |
 
 ## Team-owned packages
 
@@ -90,22 +90,11 @@ OQ-FE-1 (CODEOWNERS hygiene) can land in parallel at any time — it is not a bl
 
 # Open questions
 
-## OQ-FE-1 — CODEOWNERS hygiene (non-blocking)
-
-Ownership of the 24 in-scope packages is **assumed team-owned** as of 2026-06-18, per the CI-7194 ownership clarification. The remaining ambiguity is purely a CODEOWNERS-hygiene question:
-
-`.github/CODEOWNERS:28` has `#channel-integrations/ @hootsuite/ci-hippogriff` **commented out**, and the 24 team-owned packages have no per-package override. The two ways to fix the hygiene:
-
-* (a) Re-enable the namespace line (`channel-integrations/ @hootsuite/ci-hippogriff`) and rely on the existing per-package overrides at `CODEOWNERS:67-69` to keep the 3 carve-outs assigned to `@hootsuite/frontend-platform`.
-* (b) Leave the namespace line commented and add 24 explicit per-package overrides for the team-owned set.
-
-(a) is the simpler change and matches the intent of the original commented line. **Recommended:** land (a) during Phase 2 work as a one-line PR; this is not a blocker for the testing work itself.
-
-## OQ-FE-2 — Shared fixture format with backend Tier 1
+## OQ-FE-1 — Shared fixture format with backend Tier 1
 
 If the team commits to MSW + jest as the FE Tier 1 standard, the FE MSW handlers and the backend mock-fidelity tests should share a single fixture format so that a backend OpenAPI change invalidates both in the same PR. Concrete decision needed: where do shared fixtures live, and what generates them? Options: hand-written JSON in IDL-central next to each spec; generated from the OpenAPI examples; generated from VCR-style recordings against staging.
 
-## OQ-FE-3 — FE Playwright vs visual regression
+## OQ-FE-2 — FE Playwright vs visual regression
 
 When Tier 4 is on the roadmap, decide between:
 
@@ -117,9 +106,8 @@ Default proposal: visual regression first, synthetic later only if a real produc
 # Out of scope
 
 * Backend testing (covered in [`design-doc.md`](./design-doc.md) and [`phased-plan.md`](./phased-plan.md)).
-* The CODEOWNERS hygiene fix itself (one-line PR) — tracked as OQ-FE-1, not a blocker for testing work.
 * Visual-regression / Playwright infrastructure design beyond pointing at `platform/fe-lib-visual-testing`.
-* **Confirmed non-team-owned packages** — these are explicitly out of scope for any FE testing work this design proposes, and are listed here only so future readers do not relitigate ownership:
+* These are explicitly out of scope for any FE testing work this design proposes, and are listed here only so future readers do not relitigate ownership:
   * `fe-chan-comp-social-profile-pill` — owned by `@hootsuite/frontend-platform`
   * `fe-chan-comp-a11y-dialog` — owned by `@hootsuite/frontend-platform`
   * `fe-chan-comp-generic-dialog` — owned by `@hootsuite/frontend-platform`
