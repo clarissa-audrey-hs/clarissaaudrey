@@ -10,9 +10,9 @@ Companion to [`design-doc.md`](./design-doc.md) and [`phased-plan.md`](./phased-
 
 | Surface | What it is | Confidence team owns it | Source |
 | --- | --- | --- | --- |
-| `fe-global/channel-integrations/` (~19 `fe-chan-*` packages) | React + JS/TS mix + styled-components 5/6 + RTK + Bento `@ds/*`, jest with `*.jest.*` colocated tests, MSW for API tests in two top packages, Storybook in most UI packages | **Medium** — CODEOWNERS line **commented out** | `.github/CODEOWNERS:28`: `#channel-integrations/ @hootsuite/ci-hippogriff` (disabled). Three packages explicitly reassigned to `@hootsuite/frontend-platform`. |
+| `fe-global/channel-integrations/` (~19 `fe-chan-*` packages, **3 confirmed non-team-owned** — see [Out of scope](#out-of-scope) — leaving **~16 candidate packages**) | React + JS/TS mix + styled-components 5/6 + RTK + Bento `@ds/*`, jest with `*.jest.*` colocated tests, MSW for API tests in two top packages, Storybook in most UI packages | **Medium** — CODEOWNERS line **commented out** for the namespace; the 16 candidate packages have no per-package owner override either | `.github/CODEOWNERS:28`: `#channel-integrations/ @hootsuite/ci-hippogriff` (disabled). |
 
-**Caveat:** every FE recommendation below is _contingent on Hippogriff confirming ownership of_ `channel-integrations/`. See OQ-FE-1.
+**Caveat:** every FE recommendation below is _contingent on Hippogriff confirming ownership of the ~16 candidate packages in_ `channel-integrations/`. See OQ-FE-1.
 
 # Current state
 
@@ -82,15 +82,16 @@ If leadership wants the FE work to land:
 
 # Open questions
 
-## OQ-FE-1 — Ownership confirmation (blocking for FE work)
+## OQ-FE-1 — Ownership confirmation for the candidate ~16 packages (blocking for FE work)
 
-`.github/CODEOWNERS:28` has `#channel-integrations/ @hootsuite/ci-hippogriff` **commented out**. Three packages in the namespace are explicitly assigned to `@hootsuite/frontend-platform` (`fe-chan-comp-social-profile-pill`, `fe-chan-comp-a11y-dialog`, `fe-chan-comp-generic-dialog`).
+`.github/CODEOWNERS:28` has `#channel-integrations/ @hootsuite/ci-hippogriff` **commented out**. Five packages are confirmed non-team-owned and listed in [Out of scope](#out-of-scope). For the remaining **~16 `fe-chan-*` packages** in the namespace, ownership is still ambiguous because there is no enabled CODEOWNERS line and no per-package override.
 
-Needed from Hippogriff / frontend-platform:
+Needed from Hippogriff:
 
-* (a) Is the entire `channel-integrations/` namespace really epe-socialprofiles' to test, or are there carve-outs?
-* (b) Should the commented CODEOWNERS line be re-enabled, or are the per-package overrides authoritative?
-* (c) Is `fe-pnc-comp-grouped-profiles` (`plancreate/`, currently `@hootsuite/global-plancreate`) and `fe-ae-comp-social-profile-avatar` (`adespresso/`, currently `@hootsuite/global-adespresso`) worth claiming as profile-related work the team should also own?
+* (a) Are the ~16 unowned packages in `channel-integrations/` really Hippogriff's to test, or are there further carve-outs?
+* (b) Should the commented CODEOWNERS line be re-enabled (asserting Hippogriff owns the candidate set), or do we leave it commented and add per-package owners explicitly?
+
+Until (a) is answered for the candidate set, every FE recommendation in this doc is advisory.
 
 ## OQ-FE-2 — Shared fixture format with backend Tier 1
 
@@ -108,6 +109,11 @@ Default proposal: visual regression first, synthetic later only if a real produc
 # Out of scope
 
 * Backend testing (covered in [`design-doc.md`](./design-doc.md) and [`phased-plan.md`](./phased-plan.md)).
-* Resolving the FE ownership comment in CODEOWNERS — that is platform-level repo hygiene, not this design.
+* Resolving the FE ownership comment in CODEOWNERS for the candidate ~16 packages — that is platform-level repo hygiene, not this design (but it is the blocker for OQ-FE-1).
 * Visual-regression / Playwright infrastructure design beyond pointing at `platform/fe-lib-visual-testing`.
-* FE packages outside `fe-global/channel-integrations/` that the team may already touch (`fe-pnc-*`, `fe-ae-*`) — pending ownership clarification per OQ-FE-1(c).
+* **Confirmed non-team-owned packages** — these are explicitly out of scope for any FE testing work this design proposes, and are listed here only so future readers do not relitigate ownership:
+  * `fe-chan-comp-social-profile-pill` — owned by `@hootsuite/frontend-platform`
+  * `fe-chan-comp-a11y-dialog` — owned by `@hootsuite/frontend-platform`
+  * `fe-chan-comp-generic-dialog` — owned by `@hootsuite/frontend-platform`
+  * `fe-ae-comp-social-profile-avatar` — owned by `@hootsuite/global-adespresso`
+  * `fe-pnc-comp-grouped-profiles` — owned by `@hootsuite/global-plancreate`
