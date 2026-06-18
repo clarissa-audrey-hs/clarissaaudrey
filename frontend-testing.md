@@ -4,15 +4,22 @@
 
 Companion to [`design-doc.md`](./design-doc.md) and [`phased-plan.md`](./phased-plan.md). The four-tier pyramid, decisions D1–D7, principles, and triggers in those docs all carry forward; this page lists the FE deltas.
 
-> **Blocking gate:** every recommendation on this page is **contingent on Hippogriff confirming ownership of `channel-integrations/`**. See [Open Question OQ-FE-1](#oq-fe-1--ownership-confirmation-blocking).
-
 # Scope
 
-| Surface | What it is | Confidence team owns it | Source |
+| Surface | What it is | Ownership | Source |
 | --- | --- | --- | --- |
-| `fe-global/channel-integrations/` (~19 `fe-chan-*` packages, **3 confirmed non-team-owned** — see [Out of scope](#out-of-scope) — leaving **~16 candidate packages**) | React + JS/TS mix + styled-components 5/6 + RTK + Bento `@ds/*`, jest with `*.jest.*` colocated tests, MSW for API tests in two top packages, Storybook in most UI packages | **Medium** — CODEOWNERS line **commented out** for the namespace; the 16 candidate packages have no per-package owner override either | `.github/CODEOWNERS:28`: `#channel-integrations/ @hootsuite/ci-hippogriff` (disabled). |
+| `fe-global/channel-integrations/` (**24 team-owned `fe-chan-*` packages**; 27 in the namespace total, 3 carved out to `@hootsuite/frontend-platform`) | React + JS/TS mix + styled-components 5/6 + RTK + Bento `@ds/*`, jest with `*.jest.*` colocated tests, MSW for API tests in two top packages, Storybook in most UI packages | **Team-owned** (per CI-7194 ownership clarification, 2026-06-18). The CODEOWNERS line for the namespace is still commented out — see OQ-FE-1 (hygiene). | `.github/CODEOWNERS:28`: `#channel-integrations/ @hootsuite/ci-hippogriff` (disabled); per-package overrides at `.github/CODEOWNERS:67-69` for the 3 carve-outs. |
 
-**Caveat:** every FE recommendation below is _contingent on Hippogriff confirming ownership of the ~16 candidate packages in_ `channel-integrations/`. See OQ-FE-1.
+## Team-owned packages
+
+The 24 in-scope packages, by shape:
+
+| Category | Count | Packages |
+| --- | --- | --- |
+| Apps (mounted UIs) | 2 | `fe-chan-ig-auth-app`, `fe-chan-multiselect-auth-app` |
+| Libraries (no UI) | 2 | `fe-chan-lib-constants`, `fe-chan-lib-darklaunch` |
+| Modals / dialogs | 15 | `fe-chan-auth-success-modal`, `fe-chan-comp-add-social-account-modal`, `fe-chan-comp-auth-focus-modal`, `fe-chan-comp-auth-wizard-modal`, `fe-chan-comp-bluesky-connect-modal`, `fe-chan-comp-ig-auth-success-modal`, `fe-chan-comp-igb-auth-process-modal`, `fe-chan-comp-igb-steal-downgrade-error-modal`, `fe-chan-comp-permissions-modal`, `fe-chan-comp-reauth-modal`, `fe-chan-comp-reddit-disclaimer-modal`, `fe-chan-comp-select-instagram-type-modal`, `fe-chan-comp-tiktokbusiness-modal`, `fe-chan-comp-tiktokbusiness-paywall-modal`, `fe-chan-remove-confirmation-modal` |
+| Other components | 5 | `fe-chan-comp-i18n-context-provider`, `fe-chan-comp-permissions-messaging`, `fe-chan-comp-pii-mask`, `fe-chan-comp-profile-warning-banner`, `fe-chan-comp-question-select` |
 
 # Current state
 
@@ -25,7 +32,7 @@ Companion to [`design-doc.md`](./design-doc.md) and [`phased-plan.md`](./phased-
 | Tier 3 (cross-repo) | None — Playwright is not wired per-package; `platform/fe-lib-visual-testing` exists but not in this namespace's CI |
 | Tier 4 (post-deploy) | None |
 | BE coupling | `fe-chan-comp-reauth-modal` calls `/service/channel-auth-audit` and `/service/social-network-error-inspection`; `fe-chan-multiselect-auth-app` calls `/app/social-network/fetch` and `/ajax/instagrambusiness/get-refreshed-social-profiles` |
-| Hardest gap | Mock fidelity not enforced; ownership ambiguous |
+| Hardest gap | Mock fidelity not enforced; per-package fan-out across 24 packages with mixed test conventions (MSW vs `jest.mock`) and dual legacy/RTK codepaths in `fe-chan-multiselect-auth-app` |
 
 # Per-tier mapping
 
@@ -45,7 +52,7 @@ For FE, "in-repo integration" means **component tests against MSW that share fix
 1. **Standardize on Storybook + MSW addon** for all team-owned `fe-chan-*` packages so Tier 2 can be a single command per package.
 2. **Shared fixture format** between FE MSW handlers and backend Tier 1 mock-fidelity tests, so a backend OpenAPI change invalidates both in the same PR.
 
-Heavier lift than backend because of the per-package fan-out (~19 packages) and the legacy/RTK dual codepaths in `fe-chan-multiselect-auth-app`.
+Heavier lift than backend because of the per-package fan-out (24 team-owned packages) and the legacy/RTK dual codepaths in `fe-chan-multiselect-auth-app`.
 
 ## Tier 3 — cross-repo harness (FE side)
 
@@ -58,9 +65,9 @@ If revisited:
 
 ## Tier 4 — post-deploy smoke
 
-No FE Tier 4 today. Two options if/when ownership is confirmed:
+No FE Tier 4 today. Two options:
 
-* **Visual regression** via `platform/fe-lib-visual-testing` Playwright in CI for the team-owned packages. Snapshot the Storybook for each `fe-chan-*` UI component on dev deploys.
+* **Visual regression** via `platform/fe-lib-visual-testing` Playwright in CI for the 24 team-owned packages. Snapshot the Storybook for each `fe-chan-*` UI component on dev deploys.
 * **Synthetic UI flow** against staging dashboard exercising real reauth or multiselect modals. Heavier; defer until visual regression is in place.
 
 # Trigger matrix delta
@@ -74,24 +81,25 @@ The [Triggers and cadence section in `design-doc.md`](./design-doc.md#triggers-a
 
 If leadership wants the FE work to land:
 
-1. **OQ-FE-1 (ownership confirmation)** unblocks any FE work; until that lands, all FE proposals on this page are advisory.
-2. **MSW handler fidelity (Tier 1, new)** for `fe-chan-comp-reauth-modal` and `fe-chan-multiselect-auth-app` first — the two packages already use MSW, so the marginal cost is just the Specmatic gate.
-3. **Storybook + MSW addon standardization** across the rest of the team-owned `fe-chan-*` packages.
-4. **Visual regression (Tier 4)** once Tier 1 fidelity is in place and a deploy cadence is wired.
-5. **FE Playwright in the harness (Phase 3.5)** only if the disconnect/reauth UI starts breaking in ways Tier 1+2 cannot catch.
+1. **MSW handler fidelity (Tier 1, new)** for `fe-chan-comp-reauth-modal` and `fe-chan-multiselect-auth-app` first — the two packages already use MSW, so the marginal cost is just the Specmatic gate.
+2. **Storybook + MSW addon standardization** across the rest of the 24 team-owned packages, prioritising the 15 modal/dialog packages (high reuse, similar shape) before the long tail.
+3. **Visual regression (Tier 4)** once Tier 1 fidelity is in place and a deploy cadence is wired.
+4. **FE Playwright in the harness (Phase 3.5)** only if the disconnect/reauth UI starts breaking in ways Tier 1+2 cannot catch.
+
+OQ-FE-1 (CODEOWNERS hygiene) can land in parallel at any time — it is not a blocker for the work above.
 
 # Open questions
 
-## OQ-FE-1 — Ownership confirmation for the candidate ~16 packages (blocking for FE work)
+## OQ-FE-1 — CODEOWNERS hygiene (non-blocking)
 
-`.github/CODEOWNERS:28` has `#channel-integrations/ @hootsuite/ci-hippogriff` **commented out**. Five packages are confirmed non-team-owned and listed in [Out of scope](#out-of-scope). For the remaining **~16 `fe-chan-*` packages** in the namespace, ownership is still ambiguous because there is no enabled CODEOWNERS line and no per-package override.
+Ownership of the 24 in-scope packages is **assumed team-owned** as of 2026-06-18, per the CI-7194 ownership clarification. The remaining ambiguity is purely a CODEOWNERS-hygiene question:
 
-Needed from Hippogriff:
+`.github/CODEOWNERS:28` has `#channel-integrations/ @hootsuite/ci-hippogriff` **commented out**, and the 24 team-owned packages have no per-package override. The two ways to fix the hygiene:
 
-* (a) Are the ~16 unowned packages in `channel-integrations/` really Hippogriff's to test, or are there further carve-outs?
-* (b) Should the commented CODEOWNERS line be re-enabled (asserting Hippogriff owns the candidate set), or do we leave it commented and add per-package owners explicitly?
+* (a) Re-enable the namespace line (`channel-integrations/ @hootsuite/ci-hippogriff`) and rely on the existing per-package overrides at `CODEOWNERS:67-69` to keep the 3 carve-outs assigned to `@hootsuite/frontend-platform`.
+* (b) Leave the namespace line commented and add 24 explicit per-package overrides for the team-owned set.
 
-Until (a) is answered for the candidate set, every FE recommendation in this doc is advisory.
+(a) is the simpler change and matches the intent of the original commented line. **Recommended:** land (a) during Phase 2 work as a one-line PR; this is not a blocker for the testing work itself.
 
 ## OQ-FE-2 — Shared fixture format with backend Tier 1
 
@@ -99,7 +107,7 @@ If the team commits to MSW + jest as the FE Tier 1 standard, the FE MSW handlers
 
 ## OQ-FE-3 — FE Playwright vs visual regression
 
-If/when ownership is confirmed and Tier 4 is on the roadmap, decide between:
+When Tier 4 is on the roadmap, decide between:
 
 * **Visual regression** (Storybook snapshots via `platform/fe-lib-visual-testing`) — cheaper, already-integrated infra, but only catches rendering bugs.
 * **Synthetic UI flow** against staging dashboard — heavier, but catches regressions in real user flows (reauth modal, multiselect).
@@ -109,7 +117,7 @@ Default proposal: visual regression first, synthetic later only if a real produc
 # Out of scope
 
 * Backend testing (covered in [`design-doc.md`](./design-doc.md) and [`phased-plan.md`](./phased-plan.md)).
-* Resolving the FE ownership comment in CODEOWNERS for the candidate ~16 packages — that is platform-level repo hygiene, not this design (but it is the blocker for OQ-FE-1).
+* The CODEOWNERS hygiene fix itself (one-line PR) — tracked as OQ-FE-1, not a blocker for testing work.
 * Visual-regression / Playwright infrastructure design beyond pointing at `platform/fe-lib-visual-testing`.
 * **Confirmed non-team-owned packages** — these are explicitly out of scope for any FE testing work this design proposes, and are listed here only so future readers do not relitigate ownership:
   * `fe-chan-comp-social-profile-pill` — owned by `@hootsuite/frontend-platform`
