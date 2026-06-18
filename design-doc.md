@@ -4,7 +4,7 @@
 
 > **Read next:** [`phased-plan.md`](./phased-plan.md) — Phases 1 through 5, sequencing, critical-path ordering, open questions, out of scope.
 >
-> **Frontend companion:** [`frontend-testing.md`](./frontend-testing.md) — `channel-integrations/` FE testing strategy. Different toolchain (jest + MSW, Storybook), different cadence story, contingent on Hippogriff ownership confirmation.
+> **Frontend companion:** [`frontend-testing.md`](./frontend-testing.md) — `channel-integrations/` FE testing strategy. Different toolchain (jest + MSW, Storybook), different cadence story.
 >
 > **Read also:** [`services-inventory.md`](./services-inventory.md) — what other Hootsuite services (SCUM, SNP, dashboard) have for integration and contract tests today, patterns we are borrowing, and patterns we are avoiding.
 
