@@ -4,7 +4,7 @@
 
 Companion to [`design-doc.md`](./design-doc.md). Frontend companion: [`frontend-testing.md`](./frontend-testing.md).
 
-> **Read also:** [Hootsuite services — integration and contract test inventory (CI-7194)](https://hootsuite.atlassian.net/wiki/spaces/CI/pages/13967753294) — patterns we are borrowing (SCUM subproject, FunctionOverrider) and avoiding (shared dev RDS, ignore-and-continue gates).
+> **Read also:** [`services-inventory.md`](./services-inventory.md) — what SCUM, SNP, and dashboard have for integration and contract testing today; patterns we are borrowing (SCUM subproject + tag taxonomy, FunctionOverrider hermeticity guard) and avoiding (phantom Makefile targets, shared dev RDS, ignore-and-continue gates).
 
 # Phase 1 — Make `channel-auth-tool` agent-driveable (foundation)
 
@@ -157,7 +157,7 @@ We start with **provider-published OpenAPI contracts**, not consumer-driven cont
 | Source of truth | OpenAPI in IDL-central / `schema/` | Contracts hosted by each consumer |
 | Adoption cost | Per-repo, can land in parallel | Cross-team coordination required |
 | Drift detection | Tier 2 conformance suite (D3) | Provider runs each consumer's contracts against itself |
-| Hootsuite precedent | None at PR time (gap our plan addresses) | SCUM's `consumer-contract-test-staging-service-mobile-api` (see [services inventory](https://hootsuite.atlassian.net/wiki/spaces/CI/pages/13967753294)) |
+| Hootsuite precedent | None at PR time (gap our plan addresses) | SCUM's `consumer-contract-test-staging-service-mobile-api` (see [`services-inventory.md`](./services-inventory.md)) |
 
 **Migration trigger:** revisit consumer-driven once at least two of `social-network-proxy`, `social-communication`, or `dashboard` express interest in owning their channel-auth/core/social-network-auth contracts. Until then, the spec wins; consumers consume.
 

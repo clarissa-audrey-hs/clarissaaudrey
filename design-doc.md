@@ -6,7 +6,7 @@
 >
 > **Frontend companion:** [`frontend-testing.md`](./frontend-testing.md) — `channel-integrations/` FE testing strategy. Different toolchain (jest + MSW, Storybook), different cadence story, contingent on Hippogriff ownership confirmation.
 >
-> **Read also:** [Hootsuite services — integration and contract test inventory (CI-7194)](https://hootsuite.atlassian.net/wiki/spaces/CI/pages/13967753294) — what other Hootsuite services have for integration/contract tests today, what we are borrowing, and what we are avoiding.
+> **Read also:** [`services-inventory.md`](./services-inventory.md) — what other Hootsuite services (SCUM, SNP, dashboard) have for integration and contract tests today, patterns we are borrowing, and patterns we are avoiding.
 
 # TL;DR
 
@@ -200,7 +200,7 @@ We start contract testing with **provider-published OpenAPI** as the source of t
 2. **Most consumers today are SDK consumers**, not contract-test owners. Our Scala SDK is generated; PHP and Go consumers do not host contract tests yet.
 3. **Bootstrap cost is lower.** Provider-published lets each repo gate its own merges immediately. CDC requires inter-repo coordination and mature consumer teams.
 
-We migrate to **consumer-driven** later, mirroring SCUM's `consumer-contract-test-*` pattern (see the [services inventory](https://hootsuite.atlassian.net/wiki/spaces/CI/pages/13967753294)), once we have at least two consumer teams who want to own their expectations.
+We migrate to **consumer-driven** later, mirroring SCUM's `consumer-contract-test-*` pattern (see [`services-inventory.md`](./services-inventory.md)), once we have at least two consumer teams who want to own their expectations.
 
 ---
 
